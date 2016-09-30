@@ -1,16 +1,13 @@
-import {createStore, applyMiddleware, combineReducers} from "redux"
-import thunk from "redux-thunk"
-import shop from "./component/shop/reducer"
+import {createStore, applyMiddleware, combineReducers} from 'redux';
+import thunk from 'redux-thunk';
+import main from './component/main/reducer';
 
 export default function store(initialState) {
-
-
-    return createStore(
-        combineReducers({
-            shop
-        }),
-        initialState,
-        applyMiddleware(thunk)
-    );
-
+  return createStore(
+    combineReducers({
+      main
+    }),
+    initialState,
+    applyMiddleware(thunk)
+  );
 }

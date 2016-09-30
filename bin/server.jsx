@@ -1,117 +1,118 @@
-import express from "express";
-import path from "path";
+import webpack from 'webpack';
+import express from 'express';
+import path from 'path';
 
-import React from "react"
-import {renderToString as render} from "react-dom/server"
-import {match as matcher, RouterContext} from "react-router"
-import {Provider} from "react-redux"
+import React from 'react'
+import {renderToString as render} from 'react-dom/server'
+import {match as matcher, RouterContext} from 'react-router'
+import {Provider} from 'react-redux'
 
-import {encode} from "../client/helpers/base64"
+import {encode} from '../client/helpers/base64'
 
-import routes from "../client/routes.jsx"
-import store from "../client/store"
+import routes from '../client/routes.jsx'
+import store from '../client/store'
 
-import {compiler, PUBLIC_PATH, PORT, NODE_ENV} from "../webpack.config"
+import {development, production, PUBLIC_PATH, PORT, NODE_ENV} from '../webpack.config'
 
 
-console.log("MODE: " + NODE_ENV);
+console.log(`LAUNCHED MODE: ${NODE_ENV}`);
 
 let app = express();
+let compiler;
 
-app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "..", "views"));
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, '..', 'views'));
 
-if (NODE_ENV === "development") {
+if (NODE_ENV === 'development') {
+  compiler = webpack(development);
+  app.use(require('webpack-dev-middleware')(compiler, {
+    noInfo: true,
+    publicPath: '/',
+    hot: true,
+    compress: true
+  }));
 
-    app.use(require("webpack-dev-middleware")(compiler, {
-        noInfo: true,
-        publicPath: "/",
-        hot: true,
-        compress: true
-    }));
-
-    app.use(require("webpack-hot-middleware")(compiler));
-
+  app.use(require('webpack-hot-middleware')(compiler));
 } else {
+  compiler = webpack(production);
 
-    app.use(express.static(PUBLIC_PATH));
+  app.use(express.static(PUBLIC_PATH));
 
-    compiler.run((err, stats) => {
-        if (err) {
-            console.log(err)
-        } else {
-            console.log("build created")
-        }
-    });
+  compiler.run((err, stats) => {
+    if (err) {
+      console.log(err)
+    } else {
+      console.log('build created')
+    }
+  });
 }
 
 
 app.use((req, res) => {
 
-    let __store = store({});
-    let __routes = routes(__store);
+  let __store = store({});
+  let __routes = routes(__store);
 
-    matcher(
-        {routes: __routes, location: req.url},
-        (err, redirect, props) => {
+  matcher(
+    {routes: __routes, location: req.url},
+    (err, redirect, props) => {
 
-            let html = "";
+      let html = '';
 
-            if (props) {
+      if (props) {
+        let promises = [];
+        props.routes
+          .forEach(
+            (route) => {
+              if (route.component.promises) {
+                props.params.hostname = req.hostname;
+                route.component.promises(props.params)
+                  .forEach(promise => {
+                    promises.push(promise(__store.dispatch));
+                  });
+              }
 
-                let promises = [];
-                props.routes
-                    .forEach(
-                        (route) => {
-                            if (route.component.promises) {
-                                props.params.hostname = req.hostname;
-                                route.component.promises(props.params)
-                                    .forEach(promise => {
-                                        promises.push(promise(__store.dispatch));
-                                    });
-                            }
+            });
 
-                        });
+        let cb = () => {
+          html = {
+            NODE_ENV: NODE_ENV,
+            content: render(
+              <Provider store={__store}>
+                <RouterContext {...props} />
+              </Provider>
+            )
+          };
 
+          let state = __store.getState();
 
-                let cb = () => {
+          html['state'] = `window.__INITIAL_STATE__='${encode(JSON.stringify(state))}'`;
 
-
-                    html = {
-                        NODE_ENV: NODE_ENV,
-                        content: render(
-                            <Provider store={__store}>
-                                <RouterContext {...props} />
-                            </Provider>
-                        )
-                    };
-
-                    let state = __store.getState();
-
-                    html['state'] = `window.__INITIAL_STATE__="${encode(JSON.stringify(state))}"`;
-                    html['favicon'] = state.shop.payload.settings.faviconPath;
-
-                    res
-                        .status(200)
-                        .render("layout", html)
-                };
-
-                Promise
-                    .all(promises)
-                    .then(cb)
-                    .catch(cb)
-            } else {
-
-                res
-                    .status(500)
-                    .render("error", err)
+          if (state.app && state.app.settings) {
+            if (state.app.settings.faviconPath) {
+              html['favicon'] = state.app.settings.faviconPath;
             }
+          }
 
+          res
+            .status(200)
+            .render('layout', html)
+        };
 
-        });
+        Promise
+          .all(promises)
+          .then(cb)
+          .catch(cb)
+      } else {
+        res
+          .status(500)
+          .render('error', err)
+      }
+
+    });
 
 });
 
 app.listen(PORT, () => {
-    console.info(`==> Listening on port ${PORT}. Open up http://localhost:${PORT}/ in your browser.`)
+  console.info(`==> Listening on port ${PORT}. Open up http://localhost:${PORT}/ in your browser.`)
 });
