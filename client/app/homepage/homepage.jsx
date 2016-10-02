@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router'
+import {Link} from 'react-router';
 
 if (global.IS_BROWSER) {
   require('./homepage.styl');
@@ -15,9 +15,9 @@ class Homepage extends Component {
 
         <Link to='/catalog'>Go catalog</Link>
       </div>
-    )
+    );
   }
 
 }
 
-export default Homepage
+export default Homepage;
