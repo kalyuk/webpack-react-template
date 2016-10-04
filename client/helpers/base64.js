@@ -7,9 +7,9 @@ export function encode(_data_) {
 
   // pack three octets into four hexets
   do {
-    o1 = data.charCodeAt(i += 1);
-    o2 = data.charCodeAt(i += 1);
-    o3 = data.charCodeAt(i += 1);
+    o1 = data.charCodeAt(i++); // eslint-disable-line no-plusplus
+    o2 = data.charCodeAt(i++); // eslint-disable-line no-plusplus
+    o3 = data.charCodeAt(i++); // eslint-disable-line no-plusplus
 
     bits = o1 << 16 | o2 << 8 | o3;
 
@@ -44,10 +44,10 @@ export function decode(data) {
       o1, o2, o3, h1, h2, h3, h4, bits;
 
   do {
-    h1 = b64.indexOf(data.charAt(i += 1));
-    h2 = b64.indexOf(data.charAt(i += 1));
-    h3 = b64.indexOf(data.charAt(i += 1));
-    h4 = b64.indexOf(data.charAt(i += 1));
+    h1 = b64.indexOf(data.charAt(i++)); // eslint-disable-line no-plusplus
+    h2 = b64.indexOf(data.charAt(i++)); // eslint-disable-line no-plusplus
+    h3 = b64.indexOf(data.charAt(i++)); // eslint-disable-line no-plusplus
+    h4 = b64.indexOf(data.charAt(i++)); // eslint-disable-line no-plusplus
 
     bits = h1 << 18 | h2 << 12 | h3 << 6 | h4;
 
