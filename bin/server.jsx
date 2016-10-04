@@ -2,18 +2,17 @@ import webpack from 'webpack';
 import express from 'express';
 import path from 'path';
 
-import React from 'react'
-import {renderToString as render} from 'react-dom/server'
-import {match as matcher, RouterContext} from 'react-router'
-import {Provider} from 'react-redux'
+import React from 'react';
+import {renderToString as render} from 'react-dom/server';
+import {match as matcher, RouterContext} from 'react-router';
+import {Provider} from 'react-redux';
 
-import {encode} from '../client/helpers/base64'
+import {encode} from '../client/helpers/base64';
 
-import routes from '../client/routes.jsx'
-import store from '../client/store'
+import routes from '../client/routes.jsx';
+import store from '../client/store';
 
-import {development, production, PUBLIC_PATH, PORT, NODE_ENV} from '../webpack.config'
-
+import {development, production, PUBLIC_PATH, PORT, NODE_ENV} from '../webpack.config';
 
 console.log(`LAUNCHED MODE: ${NODE_ENV}`);
 
