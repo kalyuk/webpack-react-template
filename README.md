@@ -1,6 +1,6 @@
 for use;
 
-git clone https://github.com/av-k/webpack-react-template.git my_project
+git clone https://github.com/kalyuk/webpack-react-template.git my_project
 
 go to dir project
 
