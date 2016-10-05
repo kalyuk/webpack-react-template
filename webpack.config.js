@@ -8,12 +8,12 @@ import _ from 'lodash';
 
 import {NODE_ENV, PORT, API_URL} from './bin/env_config';
 
-/* eslint-enable */
-const PARAM_PATH = '/client';
+
+const PARAM_SRC = '/client';
 const PARAM_PUBLIC = '/.tmp';
 
 export {NODE_ENV, PORT} from './bin/env_config';
-export const SOURCE_PATH = path.join(__dirname, PARAM_PATH);
+export const SOURCE_PATH = path.join(__dirname, PARAM_SRC);
 export const PUBLIC_PATH = path.join(__dirname, PARAM_PUBLIC);
 
 global.Promise = Bluebird;
@@ -71,7 +71,8 @@ let config = {
       {
         test: /\.js?x?$/,
         loaders: ['eslint'],
-        include: [new RegExp(PARAM_PATH)]
+        //include: [new RegExp(PARAM_SRC)]
+        include: [SOURCE_PATH]
       }
     ]
   },
@@ -122,12 +123,13 @@ export const production = _.extend({}, config, {
 });
 
 export const development = _.extend({}, config, {
-  'entry.app': {
-    app: config.entry.app.concat([
-      `webpack-hot-middleware/client?http://0.0.0.0:${PORT}`,
-      'webpack/hot/only-dev-server'
-    ])
-  },
+    entry: {
+        app: config.entry.app.concat([
+            `webpack-hot-middleware/client?http://0.0.0.0:${PORT}`,
+            'webpack/hot/only-dev-server'
+        ]),
+        vendors: config.entry.vendors
+    },
   plugins: config.plugins.concat(new webpack.HotModuleReplacementPlugin()),
   module: _.extend({}, config.module, {
     loaders: (function () {

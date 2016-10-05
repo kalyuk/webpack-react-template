@@ -1,9 +1,12 @@
-import React, {Component} from 'react';
+import React, {Component, PropTypes} from 'react';
 
 if (global.IS_BROWSER) {
   require('./app.styl');
 }
 
+const propTypes = {
+  children: PropTypes.node
+};
 
 class App extends Component {
 
@@ -16,5 +19,7 @@ class App extends Component {
   }
 
 }
+
+App.propTypes = propTypes;
 
 export default App;
