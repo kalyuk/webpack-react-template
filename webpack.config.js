@@ -4,6 +4,7 @@ import path from 'path';
 import Bluebird from 'bluebird';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import ProgressPlugin from 'webpack/lib/ProgressPlugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
 import _ from 'lodash';
 
 import {NODE_ENV, PORT, API_URL} from './bin/env_config';
@@ -31,7 +32,6 @@ let config = {
   },
   resolve: {
     root:               SOURCE_PATH,
-    modulesDirectories: ['node_modules'],
     extensions:         ['', '.js', '.jsx']
   },
   target: 'web',
@@ -65,81 +65,88 @@ let config = {
       {
         test: /\.(svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
         loader: 'file?name=../.tmp/svg/[name].[ext]'
+      },
+      {
+        test: /\.json$/,
+        loader: 'json'
       }
     ],
     preLoaders: [
       {
         test: /\.js?x?$/,
         loaders: ['eslint'],
-        //include: [new RegExp(PARAM_SRC)]
         include: [SOURCE_PATH]
       }
     ]
-  },
-  node: {
-    __filename: true
-  },
-  stats: {
-    colors: true
   },
   eslint: {
     configFile: '.eslintrc'
   },
   plugins: [
+    new webpack.NoErrorsPlugin(),
     new ExtractTextPlugin('css/[name].css'),
+    new CopyWebpackPlugin([
+      {from: "images", to: "images"},
+      {from: "fonts", to: "fonts"}
+    ]),
     new webpack.DefinePlugin({
       'global.IS_BROWSER': true,
       'process.env': {
         NODE_ENV: JSON.stringify(NODE_ENV),
         API_URL: JSON.stringify(API_URL)
       }
-    }),
-    new webpack.NoErrorsPlugin()
+    })
   ]
 };
 
-export const production = _.extend({}, config, {
-  plugins: (function () {
-    let uglifyJsPlugin = new webpack.optimize.UglifyJsPlugin({
-      minimize: true,
-      compress: {
-        warnings: false,
-        unused: true,
-        drop_debugger: true, // eslint-disable-line camelcase
-        drop_console: true   // eslint-disable-line camelcase
-      }
-    });
+let envConfig = {}; // eslint-disable-line one-var
 
-    let progressPlugin = new ProgressPlugin(function (percentage, msg) {
-      let percents = percentage * 100;
-      let percentageFormatted = String(percents).split('.').length > 1 ? (percents).toFixed(2) : percents;
+if (NODE_ENV !== 'development') {
+  envConfig = _.extend({}, config, {
+    plugins: (function () {
+      let uglifyJsPlugin = new webpack.optimize.UglifyJsPlugin({
+        minimize: true,
+        compress: {
+          warnings: false,
+          unused: true,
+          drop_debugger: true, // eslint-disable-line camelcase
+          drop_console: true   // eslint-disable-line camelcase
+        }
+      });
 
-      console.log(percentageFormatted + '%', msg); // eslint-disable-line no-console
-    });
+      let progressPlugin = new ProgressPlugin(function (percentage, msg) { // eslint-disable-line one-var
+        let percents = percentage * 100,
+          percentageFormatted = String(percents).split('.').length > 1 ? (percents).toFixed(2) : percents;
 
-    return config.plugins.concat(uglifyJsPlugin, progressPlugin, new webpack.optimize.DedupePlugin());
-  }()),
-  eslint: _.extend({}, config.eslint, {emitError: true})
-});
+        console.log(percentageFormatted + '%', msg); // eslint-disable-line no-console
+      });
 
-export const development = _.extend({}, config, {
+      return config.plugins.concat(uglifyJsPlugin, progressPlugin, new webpack.optimize.DedupePlugin());
+    }()),
+    eslint: _.extend({}, config.eslint, {emitError: true})
+  });
+} else {
+  envConfig = _.extend({}, config, {
     entry: {
-        app: config.entry.app.concat([
-            `webpack-hot-middleware/client?http://0.0.0.0:${PORT}`,
-            'webpack/hot/only-dev-server'
-        ]),
-        vendors: config.entry.vendors
+      app: config.entry.app.concat([
+        `webpack-hot-middleware/client?http://0.0.0.0:${PORT}`,
+        'webpack/hot/only-dev-server'
+      ]),
+      vendors: config.entry.vendors
     },
-  plugins: config.plugins.concat(new webpack.HotModuleReplacementPlugin()),
-  module: _.extend({}, config.module, {
-    loaders: (function () {
-      let loaders = config.module.loaders;
+    plugins: config.plugins.concat(new webpack.HotModuleReplacementPlugin()),
+    module: _.extend({}, config.module, {
+      loaders: (function () {
+        let loaders = config.module.loaders;
 
-      loaders[0].loader = 'style!css!stylus';
-      loaders[2].loaders.unshift('react-hot');
+        loaders[0].loader = 'style!css!stylus';
+        loaders[2].loaders.unshift('react-hot');
 
-      return loaders;
-    }())
-  }),
-  devtool: 'eval'
-});
+        return loaders;
+      }())
+    }),
+    devtool: 'eval'
+  });
+}
+
+export const compiler = webpack(envConfig);

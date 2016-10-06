@@ -1,6 +1,6 @@
 import App from './app/app.jsx';
 import Homepage from './app/homepage/homepage.jsx';
-import Catalog from './app/catalog/catalog.jsx';
+import About from './app/about/about.jsx';
 
 
 export default function () {
@@ -12,8 +12,8 @@ export default function () {
     },
     childRoutes: [
       {
-        path: '/catalog',
-        component: Catalog
+        path: '/about',
+        component: About
       }
     ]
   };

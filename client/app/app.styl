@@ -1,2 +1,22 @@
+@import "variables"
+
+/* GLOBAL */
+*
+  outline none !important
+
+html
+  font-size 62.5%
+
 body
-  color red
+  font-family $font-family
+  margin 0
+  background-color $background-color-main
+
+html, body, #container, #content, #content > div
+  height 100%
+
+textarea
+  resize vertical
+
+select, input[type="text"]
+  width 100%

@@ -10,8 +10,8 @@ import store from './store';
 
 window.React = React;
 
-const initialState = window.__INITIAL_STATE__ ? JSON.parse(decode(window.__INITIAL_STATE__)) : {}, // eslint-disable-line no-underscore-dangle
-      catchedStore = store(initialState);
+const initialState = window.__INITIAL_STATE__ ? JSON.parse(decode(window.__INITIAL_STATE__)) : {}; // eslint-disable-line no-underscore-dangle
+const catchedStore = store(initialState);
 
 render(
   <Provider store={catchedStore}>
