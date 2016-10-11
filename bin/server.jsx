@@ -1,4 +1,3 @@
-import webpack from 'webpack';
 import express from 'express';
 import path from 'path';
 
@@ -12,18 +11,16 @@ import {encode} from '../client/helpers/base64';
 import routes from '../client/routes.jsx';
 import store from '../client/store';
 
-import {development, production, PUBLIC_PATH, PORT, NODE_ENV} from '../webpack.config';
+import {compiler, PUBLIC_PATH, PORT, NODE_ENV} from '../webpack.config';
 
-console.log(`LAUNCHED MODE: ${NODE_ENV}`);
+console.log(`>>> LAUNCHED MODE: ${NODE_ENV}`);
 
 let app = express();
-let compiler;
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, '..', 'views'));
 
 if (NODE_ENV === 'development') {
-  compiler = webpack(development);
   app.use(require('webpack-dev-middleware')(compiler, {
     noInfo: true,
     publicPath: '/',
@@ -33,22 +30,18 @@ if (NODE_ENV === 'development') {
 
   app.use(require('webpack-hot-middleware')(compiler));
 } else {
-  compiler = webpack(production);
-
   app.use(express.static(PUBLIC_PATH));
 
   compiler.run((err, stats) => {
     if (err) {
       console.log(err)
     } else {
-      console.log('build created')
+      console.log('build created <<<')
     }
   });
 }
 
-
 app.use((req, res) => {
-
   let __store = store({});
   let __routes = routes(__store);
 
@@ -67,7 +60,7 @@ app.use((req, res) => {
                 props.params.hostname = req.hostname;
                 route.component.promises(props.params)
                   .forEach(promise => {
-                    promises.push(promise(__store.dispatch));
+                    promises.push(promise(__store.dispatch, __store.getState));
                   });
               }
 

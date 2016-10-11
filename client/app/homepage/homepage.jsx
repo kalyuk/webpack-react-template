@@ -10,10 +10,9 @@ class Homepage extends Component {
 
   render() {
     return (
-      <div>
-        Homepage
-
-        <Link to='/catalog'>Go catalog</Link>
+      <div className='page-homepage'>
+        <div>Page: Homepage<hr /></div>
+        <Link to='/about'>About</Link>
       </div>
     );
   }
