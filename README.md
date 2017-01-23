@@ -1,18 +1,30 @@
-for use;
+# React Boilerplate
+Frontend boilerplate developed on:
+- [ReactJS](https://github.com/facebook/react) + [Redux](https://github.com/reactjs/redux)
+- [Pug](https://github.com/pugjs/pug)
+- [Stylus](https://github.com/stylus/stylus)
+- [Babel](https://github.com/babel/babel)
+- [Eslint](https://github.com/eslint/eslint) based on config by [AirBnb](https://github.com/airbnb/javascript)
+- [Webpack 1.x](https://github.com/webpack/webpack)
 
-git clone https://github.com/av-k/webpack-react-template.git my_project
+## Installation
 
-go to dir project
+#### Project requires:
+* [Node.js](https://nodejs.org/) v.6+
 
-cd my_project
+Install the dependencies and devDependencies:
+```sh
+$ npm install
+```
 
-npm install
+Start the local server
+```sh
+$ npm run start
+```
 
-for run development mode 
+Available commands you can see in _package.json_ (scripts)
 
-npm start
-
-
-for run production mode
-
-npm run prod
+#### Environments params:
+- **NODE_ENV** - environment
+- **PORT** - port for node server (*http://0.0.0.0:{PORT}*)
+- **API_URL** - REST API url
