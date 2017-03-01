@@ -24,7 +24,7 @@ let config = {
   debug: NODE_ENV !== 'production',
   entry: {
     app: [
-      './client.jsx'
+			'babel-polyfill', './client.jsx'
     ],
     vendors: [
       path.join(__dirname, 'node_modules/bootstrap/dist/css/bootstrap.min.css')
